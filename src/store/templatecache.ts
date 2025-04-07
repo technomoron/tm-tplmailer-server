@@ -1,4 +1,4 @@
-import * as nunjucks from 'nunjucks';
+import nunjucks from 'nunjucks';
 
 import { api_domain, api_domain_type } from '../models/domain';
 import { api_template, api_template_type } from '../models/template';
