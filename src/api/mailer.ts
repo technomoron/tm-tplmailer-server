@@ -2,7 +2,8 @@ import emailAddresses, { ParsedMailbox } from 'email-addresses';
 import { convert } from 'html-to-text';
 // import mjml2html from 'mjml';
 
-import { apiError, apiRoute, apiModule } from '../lib/api-server';
+// import { apiError, apiRoute, apiModule } from '../lib/api-server';
+import { apiError, apiRoute, apiModule } from 'tm-api-server';
 import { api_template } from '../models/template';
 import { extapiRequest } from '../server';
 import { storage } from '../store/store';

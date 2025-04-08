@@ -1,5 +1,6 @@
 import MailerAPI from './api/mailer';
-import { apiRequest, apiServer, apiError, apiAuthClass } from './lib/api-server';
+// import { apiRequest, apiServer, apiError, apiAuthClass } from './lib/api-server';
+import { apiRequest, apiServer, apiError, apiAuthClass } from 'tm-api-server';
 import { api_domain } from './models/domain';
 import { api_user } from './models/user';
 import { storage } from './store/store';
