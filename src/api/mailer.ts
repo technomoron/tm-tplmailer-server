@@ -1,11 +1,11 @@
-import { apiModule, apiRoute, apiError } from 'tm-api-server';
 import emailAddresses, { ParsedMailbox } from 'email-addresses';
 import { convert } from 'html-to-text';
 import nunjucks from 'nunjucks';
-import { api_domain } from '../models/domain.js';
-import { api_user } from '../models/user.js';
+import { apiModule, apiRoute, apiError } from 'tm-api-server';
 
+import { api_domain } from '../models/domain.js';
 import { api_template } from '../models/template.js';
+import { api_user } from '../models/user.js';
 import { mailApiServer } from '../server.js';
 import { mailApiRequest } from '../types.js';
 
@@ -64,13 +64,11 @@ export class mailerAPI extends apiModule<mailApiServer> {
 		apireq.user = user;
 	}
 
-
 	// Store a template in the database
 
 	private async post_template(apireq: mailApiRequest): Promise<[number, any]> {
-	
 		this.assert_domain_and_user(apireq);
-		
+
 		const { template, sender = '', name, subject = '', locale = '' } = apireq.req.body;
 
 		if (!template) {
@@ -115,7 +113,6 @@ export class mailerAPI extends apiModule<mailApiServer> {
 	// Send a template using posted arguments.
 
 	private async post_send(apireq: mailApiRequest): Promise<[number, any]> {
-
 		this.assert_domain_and_user(apireq);
 
 		const { name, rcpt, user, domain = '', locale = '', vars = {} } = apireq.req.body;
