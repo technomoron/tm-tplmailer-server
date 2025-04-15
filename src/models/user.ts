@@ -1,13 +1,13 @@
 import { Sequelize, Model, DataTypes } from 'sequelize';
 
 export class api_user extends Model {
-	public user_id!: number;
-	public idname!: string;
-	public token!: string;
-	public name!: string;
-	public email!: string;
-	public defdomain!: 0;
-	public deflocale!: string;
+	declare user_id: number;
+	declare idname: string;
+	declare token: string;
+	declare name: string;
+	declare email: string;
+	declare defdomain: number;
+	declare deflocale: string;
 }
 
 export async function init_api_user(api_db: Sequelize): Promise<typeof api_user> {

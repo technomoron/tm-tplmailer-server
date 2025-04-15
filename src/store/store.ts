@@ -1,65 +1,41 @@
 import { createTransport } from 'nodemailer';
 import { Sequelize, Dialect } from 'sequelize';
-import sp from 'synchronized-promise';
 
-import { connect_api_db } from '../models/db';
-import { Server, extapiRequest } from '../server';
+import { connect_api_db } from '../models/db.js';
+import { ImailStore } from '../types.js';
 
-import { get_sane_env, generate_env_dist, get_safe_env, get_api_keys } from './envloader';
-import { TemplateStorage } from './templatecache';
+import { get_sane_env, generate_env_dist, get_api_keys } from './envloader.js';
 
-/*
-type DomainMapId = Record<number, api_domain_type>;
-type TemplateMap = Record<string, api_template_type>;
+export class mailStore implements ImailStore {
+	is_production = false;
+	is_staging = false;
+	is_development = false;
+	swagger_enable = false;
+	swagger_path = '';
 
-interface TemplateStore {
-    [domain_id: number]: {
-        userid: number;
-        deflocale: string;
-        domain: api_domain_type;
-        templates: TemplateMap;
-    };
-};
-*/
+	api_url = '';
+	api_host = '0.0.0.0';
+	api_port = 3780;
+	api_dbuser = '';
+	api_dbpass = '';
+	api_dbname = '';
+	api_dbhost = '';
+	api_dbtype: Dialect = 'sqlite';
+	api_dblog = false;
+	api_db: Sequelize | null = null;
 
-export class mystorage {
-	server: Server | null = null;
-
-	is_production: boolean = false;
-	is_staging: boolean = false;
-	is_development: boolean = false;
-
-	api_url: string;
-	api_host: string;
-	api_port: number;
-
-	cur_api_req: extapiRequest | null;
-
-	swagger_enable: boolean;
-	swagger_path: string;
-
-	api_dbuser: string;
-	api_dbpass: string;
-	api_dbname: string;
-	api_dbhost: string;
-	api_dbtype: Dialect;
-	api_dblog: boolean;
-	api_db!: Sequelize;
-
-	jwt_secret: string;
+	jwt_secret = '';
 	jwt_refresh: string;
 
-	smtp_host: string;
-	smtp_port: number;
-	smtp_secure: boolean;
-	smtp_tls_reject: boolean;
-	smtp_user: string;
-	smtp_password: string;
+	smtp_host = '';
+	smtp_port = 25;
+	smtp_secure = false;
+	smtp_tls_reject = false;
+	smtp_user = '';
+	smtp_password = '';
 
 	keys: Record<string, any>;
 	mailer: any;
-
-	templatecache: TemplateStorage;
 
 	constructor() {
 		generate_env_dist();
@@ -75,8 +51,6 @@ export class mystorage {
 		} else {
 			this.is_development = true;
 		}
-
-		this.cur_api_req = null;
 
 		this.api_port = Number(saneenv.API_PORT) || 3780;
 		this.api_host = String(saneenv.API_HOST) || '0.0.0.0';
@@ -104,9 +78,18 @@ export class mystorage {
 
 		this.keys = get_api_keys();
 
-		this.templatecache = new TemplateStorage();
-
 		this.mailer = this.create_mail_transport();
+	}
+
+	async init(): Promise<this> {
+		try {
+			// await this.templatecache.preload_templates();
+			this.api_db = await connect_api_db(this);
+		} catch (err) {
+			console.error('Error during initialization:', err);
+			throw err;
+		}
+		return this;
 	}
 
 	private create_mail_transport() {
@@ -117,6 +100,8 @@ export class mystorage {
 			tls: {
 				rejectUnauthorized: this.smtp_tls_reject,
 			},
+			// logger: true,
+			// debug: true,
 		};
 		const user = this.smtp_user;
 		const pass = this.smtp_password;
@@ -137,16 +122,6 @@ export class mystorage {
 	}
 }
 
-const storage: mystorage = new mystorage();
+const store: mailStore = await new mailStore().init();
 
-const initializeDatabases = async () => {
-	[storage.api_db] = await Promise.all([connect_api_db()]);
-};
-sp(initializeDatabases)();
-
-const preloadData = async () => {
-	await Promise.all([storage.templatecache.preload_templates()]);
-};
-sp(preloadData)();
-
-export { storage };
+export { store };

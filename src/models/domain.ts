@@ -10,12 +10,12 @@ export interface api_domain_type {
 }
 
 export class api_domain extends Model {
-	public domain_id!: number;
-	public user_id!: number;
-	public domain!: string;
-	public sender!: string;
-	public deflocale!: string;
-	public is_default!: boolean;
+	declare domain_id: number;
+	declare user_id: number;
+	declare domain: string;
+	declare sender: string;
+	declare deflocale: string;
+	declare is_default: boolean;
 }
 
 export async function init_api_domain(api_db: Sequelize): Promise<typeof api_domain> {

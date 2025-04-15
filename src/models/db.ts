@@ -1,13 +1,17 @@
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
 import { Sequelize } from 'sequelize';
 
-import { storage } from '../store/store'; // -typescript';
+import { ImailStore } from '../types.js';
 
-import { init_api_domain, api_domain } from './domain';
-import { init_api_template, api_template } from './template';
-import { init_api_user, api_user } from './user';
+import { init_api_domain, api_domain } from './domain.js';
+import { init_api_template, api_template } from './template.js';
+import { init_api_user, api_user } from './user.js';
 
-const fs = require('fs');
-const path = require('path');
+const _filename = fileURLToPath(import.meta.url);
+const _dirname = path.dirname(_filename);
 
 async function generateHash(password: string): Promise<string> {
 	const bcrypt = require('bcryptjs');
@@ -18,7 +22,7 @@ async function generateHash(password: string): Promise<string> {
 
 async function upsert_data() {
 	try {
-		const filePath = path.join(__dirname, '../../.init-data.json');
+		const filePath = path.join(_dirname, '../../.init-data.json');
 
 		if (fs.existsSync(filePath)) {
 			const data = await fs.promises.readFile(filePath, 'utf8');
@@ -39,7 +43,7 @@ async function upsert_data() {
 			console.log('Data upserted successfully.');
 		}
 	} catch (error) {
-		console.error('Error during sync and upsert:', error);
+		throw new Error('Error during sync and upsert:' + error);
 	}
 }
 
@@ -84,16 +88,24 @@ export async function init_api_db(db: Sequelize) {
 		as: 'domain',
 	});
 
-	await db.sync({ alter: true, force: true });
-	upsert_data();
+	// TODO: Make sync force configurable
+	try {
+		await db.query('PRAGMA foreign_keys = OFF');
+		await db.sync({ alter: true, force: false });
+		await db.query('PRAGMA foreign_keys = ON');
+	} catch (err) {
+		console.error('Error during sync:', err);
+		throw err;
+	}
+	await upsert_data();
 	console.log('API Database Initialized...');
 }
 
-export async function connect_api_db(): Promise<Sequelize> {
+export async function connect_api_db(store: ImailStore): Promise<Sequelize> {
 	try {
 		const dbparams: any = {
-			logging: storage.api_dblog,
-			dialect: storage.api_dbtype,
+			logging: store.api_dblog ? console.log : false,
+			dialect: store.api_dbtype,
 			dialectOptions: {
 				charset: 'utf8mb4',
 			},
@@ -102,18 +114,15 @@ export async function connect_api_db(): Promise<Sequelize> {
 				collate: 'utf8mb4_unicode_ci',
 			},
 		};
-		if (storage.api_dbtype === 'sqlite') {
-			dbparams.storage = storage.api_dbname + '.db';
+		if (store.api_dbtype === 'sqlite') {
+			dbparams.storage = store.api_dbname + '.db';
 		} else {
-			dbparams.host = storage.api_dbhost;
-			dbparams.database = storage.api_dbname;
-			dbparams.username = storage.api_dbuser;
-			dbparams.password = storage.api_dbpass;
+			dbparams.host = store.api_dbhost;
+			dbparams.database = store.api_dbname;
+			dbparams.username = store.api_dbuser;
+			dbparams.password = store.api_dbpass;
 		}
 		const db = new Sequelize(dbparams);
-		if (storage.api_dbtype === 'sqlite') {
-			await db.query('PRAGMA foreign_keys = ON');
-		}
 		await db.authenticate();
 		console.log('API Database Connected');
 		await init_api_db(db);

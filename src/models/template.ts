@@ -10,20 +10,18 @@ export type api_template_type = {
 	sender: string;
 	subject: string;
 	slug: string;
-	part: boolean;
 };
 
 export class api_template extends Model {
-	public template_id!: number;
-	public user_id!: number;
-	public domain_id!: number;
-	public name!: string;
-	public locale!: string;
-	public template!: string;
-	public sender!: string;
-	public subject!: string;
-	public slug!: string;
-	public part!: boolean;
+	declare template_id: number;
+	declare user_id: number;
+	declare domain_id: number;
+	declare name: string;
+	declare locale: string;
+	declare template: string;
+	declare sender: string;
+	declare subject: string;
+	declare slug: string;
 }
 
 export async function init_api_template(api_db: Sequelize): Promise<typeof api_template> {

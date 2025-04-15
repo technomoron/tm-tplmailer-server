@@ -1,7 +1,11 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 import dotenv from 'dotenv';
+
+const _filename = fileURLToPath(import.meta.url);
+const _dirname = path.dirname(_filename);
 
 interface env_option {
 	description: string;
@@ -61,7 +65,7 @@ const env_options: { [key: string]: env_option } = {
 	},
 	API_DBNAME: {
 		description: 'Name of API database. Filename for sqlite3, database name for others',
-		default: 'mjml-server',
+		default: 'maildata',
 	},
 	API_DBHOST: {
 		description: 'Host of API database',
@@ -114,7 +118,7 @@ export function get_safe_env(name: string): any {
 
 export function generate_env_dist() {
 	const lines: string[] = [];
-	const p = path.resolve(__dirname, '../../', '.env-dist');
+	const p = path.resolve(_dirname, '../../', '.env-dist');
 
 	Object.entries(env_options).forEach(([key, option]) => {
 		const opt = `${option.type || 'string'}${option.required ? ' - required' : ''}`;
@@ -145,9 +149,9 @@ function parse_boolean(value: string) {
 
 export function get_api_keys(): Record<string, api_key> {
 	const keyPaths = [
-		path.resolve(__dirname, '.api-keys.json'),
-		path.resolve(__dirname, '../.api-keys.json'),
-		path.resolve(__dirname, '../../.api-keys.json'),
+		path.resolve(_dirname, '.api-keys.json'),
+		path.resolve(_dirname, '../.api-keys.json'),
+		path.resolve(_dirname, '../../.api-keys.json'),
 	];
 	for (const p of keyPaths) {
 		if (fs.existsSync(p)) {
@@ -167,9 +171,9 @@ export function get_sane_env(env: { [key: string]: string | undefined }) {
 
 	let envLoaded = false;
 	const envPaths = [
-		path.resolve(__dirname, '.env'),
-		path.resolve(__dirname, '../.env'),
-		path.resolve(__dirname, '../../.env'),
+		path.resolve(_dirname, '.env'),
+		path.resolve(_dirname, '../.env'),
+		path.resolve(_dirname, '../../.env'),
 	];
 
 	for (const envPath of envPaths) {
@@ -224,7 +228,7 @@ export function get_sane_env(env: { [key: string]: string | undefined }) {
 		throw new Error(`Environment validation failed:\n${errors.join('\n')}`);
 	}
 
-	console.log(JSON.stringify(validated_env, undefined, 2));
+	// console.log(JSON.stringify(validated_env, undefined, 2));
 
 	return validated_env;
 }

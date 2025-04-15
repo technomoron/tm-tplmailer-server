@@ -1,46 +1,24 @@
-import MailerAPI from './api/mailer';
-// import { apiRequest, apiServer, apiError, apiAuthClass } from './lib/api-server';
-import { apiRequest, apiServer, apiError, apiAuthClass } from 'tm-api-server';
-import { api_domain } from './models/domain';
-import { api_user } from './models/user';
-import { storage } from './store/store';
+import { apiServerConf, apiServer, apiError, apiAuthClass } from 'tm-api-server';
 
-export interface extapiRequest extends apiRequest {
-	user?: api_user;
-	domain?: api_domain;
-	locale?: string;
-}
+import { api_domain } from './models/domain.js';
+import { api_user } from './models/user.js';
+import { mailStore } from './store/store.js';
+import { mailApiRequest } from './types.js';
 
-export class Server extends apiServer {
+export class mailApiServer extends apiServer {
+	storage: mailStore;
+
+	constructor(
+		config: apiServerConf,
+		private store: mailStore
+	) {
+		super(config);
+		this.storage = store;
+	}
+
 	override async get_api_key(key: string): Promise<any | null> {
 		console.log(`Looking up api key  ${key}`);
 		const user = await api_user.findOne({ where: { token: key } });
 		return user ? { uid: user.user_id } : null;
 	}
-
-	override async authorize(apireq: extapiRequest, requiredClass: apiAuthClass) {
-		const { domain, locale } = apireq.req.body;
-		if (!domain) {
-			throw new apiError({ code: 401, error: 'Missing domain' });
-		}
-		const user = await api_user.findOne({ where: { token: apireq.token } });
-		if (!user) {
-			throw new apiError({ code: 401, error: `Invalid/Unknown API Key/Token '${apireq.token}'` });
-		}
-		const dbdomain = await api_domain.findOne({ where: { domain } });
-		if (!dbdomain) {
-			throw new apiError({ code: 500, error: `Unable to look up the domain '${domain}'` });
-		}
-		apireq.domain = dbdomain;
-		apireq.locale = locale || 'en';
-		apireq.user = user;
-	}
 }
-
-storage.server = new Server({
-	api_host: storage.api_host,
-	api_port: storage.api_port,
-	jwt_secret: storage.jwt_secret,
-});
-new MailerAPI().init(storage.server);
-storage.server.start();
