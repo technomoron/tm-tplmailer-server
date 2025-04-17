@@ -1,18 +1,14 @@
 {
-	"compilerOptions": {
-		"target": "esnext",
-		"module": "nodenext",
-		"moduleResolution": "nodenext",
-		"outDir": "./dist",
-		"esModuleInterop": true,
-		"allowSyntheticDefaultImports": true,
-		"forceConsistentCasingInFileNames": true,
-		"skipLibCheck": true,
-		"strict": true,
-		"baseUrl": ".",
-		"paths": {
-			"tm-api-server": ["node_modules/tm-api-server/dist/esm/tm-api-server.d.ts"]
-		}
-	},
-	"include": ["src/**/*.ts"]
+        "compilerOptions": {
+                "target": "ES2022",
+                "module": "ES2022", // compile as ES modules
+                "moduleResolution": "node",
+                "outDir": "./dist",
+                "rootDir": "./src",
+                "strict": true,
+                "esModuleInterop": true,
+                "allowSyntheticDefaultImports": true,
+                "typeRoots": ["./node_modules/@types", "./types"]
+        },
+        "include": ["src"]
 }

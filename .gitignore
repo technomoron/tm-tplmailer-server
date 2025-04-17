@@ -7,3 +7,4 @@ package-lock.json
 mjml-server
 mjml-server.db
 pnpm-lock.yaml
+maildata.db

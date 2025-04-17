@@ -1,5 +1,4 @@
 import { apiServerConf, apiServer, apiError, apiAuthClass } from 'tm-api-server';
-
 import { api_domain } from './models/domain.js';
 import { api_user } from './models/user.js';
 import { mailStore } from './store/store.js';
@@ -19,6 +18,9 @@ export class mailApiServer extends apiServer {
 	override async get_api_key(key: string): Promise<any | null> {
 		console.log(`Looking up api key  ${key}`);
 		const user = await api_user.findOne({ where: { token: key } });
+		if (!user) {
+			//throw apiError({code: 500, message: `Unable to find user for token ${key}`});
+		}
 		return user ? { uid: user.user_id } : null;
 	}
 }

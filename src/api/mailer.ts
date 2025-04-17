@@ -48,6 +48,8 @@ export class mailerAPI extends apiModule<mailApiServer> {
 
 	async assert_domain_and_user(apireq: mailApiRequest) {
 		const { domain, locale } = apireq.req.body;
+		
+		console.log(`DOMAIN ${domain}; locale ${locale}`);
 		if (!domain) {
 			throw new apiError({ code: 401, message: 'Missing domain' });
 		}
@@ -57,7 +59,7 @@ export class mailerAPI extends apiModule<mailApiServer> {
 		}
 		const dbdomain = await api_domain.findOne({ where: { domain } });
 		if (!dbdomain) {
-			throw new apiError({ code: 401, message: `Unable to look up the domain '${domain}'` });
+			throw new apiError({ code: 401, message: `Unable to look up the domain ${domain}` });
 		}
 		apireq.domain = dbdomain;
 		apireq.locale = locale || 'en';
@@ -67,6 +69,7 @@ export class mailerAPI extends apiModule<mailApiServer> {
 	// Store a template in the database
 
 	private async post_template(apireq: mailApiRequest): Promise<[number, any]> {
+		console.log("AOKJRKWERWER");
 		this.assert_domain_and_user(apireq);
 
 		const { template, sender = '', name, subject = '', locale = '' } = apireq.req.body;
@@ -77,6 +80,8 @@ export class mailerAPI extends apiModule<mailApiServer> {
 		if (!name) {
 			throw new apiError({ code: 400, message: 'Missing template name' });
 		}
+
+		console.log("HAHAMA");
 
 		const data = {
 			user_id: apireq.user!.user_id,
