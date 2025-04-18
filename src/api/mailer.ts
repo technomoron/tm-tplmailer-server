@@ -49,7 +49,6 @@ export class mailerAPI extends apiModule<mailApiServer> {
 	async assert_domain_and_user(apireq: mailApiRequest) {
 		const { domain, locale } = apireq.req.body;
 		
-		console.log(`DOMAIN ${domain}; locale ${locale}`);
 		if (!domain) {
 			throw new apiError({ code: 401, message: 'Missing domain' });
 		}
@@ -69,8 +68,8 @@ export class mailerAPI extends apiModule<mailApiServer> {
 	// Store a template in the database
 
 	private async post_template(apireq: mailApiRequest): Promise<[number, any]> {
-		console.log("AOKJRKWERWER");
-		this.assert_domain_and_user(apireq);
+
+		await this.assert_domain_and_user(apireq);
 
 		const { template, sender = '', name, subject = '', locale = '' } = apireq.req.body;
 
@@ -80,8 +79,6 @@ export class mailerAPI extends apiModule<mailApiServer> {
 		if (!name) {
 			throw new apiError({ code: 400, message: 'Missing template name' });
 		}
-
-		console.log("HAHAMA");
 
 		const data = {
 			user_id: apireq.user!.user_id,
@@ -118,7 +115,8 @@ export class mailerAPI extends apiModule<mailApiServer> {
 	// Send a template using posted arguments.
 
 	private async post_send(apireq: mailApiRequest): Promise<[number, any]> {
-		this.assert_domain_and_user(apireq);
+
+		await this.assert_domain_and_user(apireq);
 
 		const { name, rcpt, user, domain = '', locale = '', vars = {} } = apireq.req.body;
 
@@ -161,17 +159,18 @@ export class mailerAPI extends apiModule<mailApiServer> {
 		try {
 			const env = new nunjucks.Environment(null, { autoescape: false });
 
+			const compiled = nunjucks.compile(template.template, env);
+ 
 			for (const recipient of valid) {
 				const fullargs = { ...vars, _rcpt_email_: recipient };
-				const prehtml = await env.renderString(template.template, fullargs);
-				const html = prehtml.replace('%recipient_email%', recipient);
-				const textContent = convert(html);
+				const html = await compiled.render(fullargs);
+				const text = convert(html);
 				const sendargs = {
 					from: sender,
 					to: recipient,
 					subject: 'My Subject',
 					html,
-					text: textContent,
+					text,
 				};
 				await apireq.server.storage.mailer.sendMail(sendargs);
 			}
