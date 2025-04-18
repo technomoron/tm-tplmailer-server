@@ -1,14 +1,14 @@
 {
-        "compilerOptions": {
-                "target": "ES2022",
-                "module": "ES2022", // compile as ES modules
-                "moduleResolution": "node",
-                "outDir": "./dist",
-                "rootDir": "./src",
-                "strict": true,
-                "esModuleInterop": true,
-                "allowSyntheticDefaultImports": true,
-                "typeRoots": ["./node_modules/@types", "./types"]
-        },
-        "include": ["src"]
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "ES2022", // compile as ES modules
+		"moduleResolution": "node",
+		"outDir": "./dist",
+		"rootDir": "./src",
+		"strict": true,
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"typeRoots": ["./node_modules/@types", "./types"]
+	},
+	"include": ["src"]
 }

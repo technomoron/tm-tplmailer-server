@@ -48,7 +48,7 @@ export class mailerAPI extends apiModule<mailApiServer> {
 
 	async assert_domain_and_user(apireq: mailApiRequest) {
 		const { domain, locale } = apireq.req.body;
-		
+
 		if (!domain) {
 			throw new apiError({ code: 401, message: 'Missing domain' });
 		}
@@ -68,7 +68,6 @@ export class mailerAPI extends apiModule<mailApiServer> {
 	// Store a template in the database
 
 	private async post_template(apireq: mailApiRequest): Promise<[number, any]> {
-
 		await this.assert_domain_and_user(apireq);
 
 		const { template, sender = '', name, subject = '', locale = '' } = apireq.req.body;
@@ -115,7 +114,6 @@ export class mailerAPI extends apiModule<mailApiServer> {
 	// Send a template using posted arguments.
 
 	private async post_send(apireq: mailApiRequest): Promise<[number, any]> {
-
 		await this.assert_domain_and_user(apireq);
 
 		const { name, rcpt, user, domain = '', locale = '', vars = {} } = apireq.req.body;
@@ -160,7 +158,7 @@ export class mailerAPI extends apiModule<mailApiServer> {
 			const env = new nunjucks.Environment(null, { autoescape: false });
 
 			const compiled = nunjucks.compile(template.template, env);
- 
+
 			for (const recipient of valid) {
 				const fullargs = { ...vars, _rcpt_email_: recipient };
 				const html = await compiled.render(fullargs);

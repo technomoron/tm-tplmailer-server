@@ -37,3 +37,10 @@ export interface ImailStore {
 	keys: Record<string, any>;
 	mailer: any;
 }
+
+export interface formType {
+	rcpt: string;
+	sender: string;
+	subject: string;
+	template: string;
+}
